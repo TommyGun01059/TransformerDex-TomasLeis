@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Editar {{ transformer.nombre }} - TransformerDex{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('transformers.index') }}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('transformers.detail', transformer_id=transformer.id) }}">{{ transformer.nombre }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Editar</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="form-container">
+            <h1 class="mb-4">Editar Transformer</h1>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ transformer.nombre }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="Autobot" {% if transformer.tipo == 'Autobot' %}selected{% endif %}>Autobot</option>
+                        <option value="Decepticon" {% if transformer.tipo == 'Decepticon' %}selected{% endif %}>Decepticon</option>
+                        <option value="Maximal" {% if transformer.tipo == 'Maximal' %}selected{% endif %}>Maximal</option>
+                        <option value="Predacon" {% if transformer.tipo == 'Predacon' %}selected{% endif %}>Predacon</option>
+                        <option value="Otro" {% if transformer.tipo == 'Otro' %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required>{{ transformer.descripcion }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="habilidades" class="form-label">Habilidades</label>
+                    <textarea class="form-control" id="habilidades" name="habilidades" rows="3">{{ transformer.habilidades }}</textarea>
+                    <div class="form-text">Separa las habilidades con comas.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">Imagen</label>
+                    {% if transformer.imagen_url %}
+                    <div class="mb-2">
+                        <img src="{{ transformer.imagen_url }}" alt="{{ transformer.nombre }}" class="img-thumbnail" style="max-height: 150px;">
+                        <div class="form-text">Imagen actual. Sube una nueva para reemplazarla.</div>
+                    </div>
+                    {% endif %}
+                    <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <a href="{{ url_for('transformers.detail', transformer_id=transformer.id) }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

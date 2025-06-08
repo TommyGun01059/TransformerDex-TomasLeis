@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}TransformerDex - Lista de Transformers{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Lista de Transformers</h1>
+    </div>
+    <div class="col-auto">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('transformers.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Añadir Transformer
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for transformer in transformers %}
+    <div class="col">
+        <div class="card h-100">
+            {% if transformer.imagen_url %}
+            <img src="{{ transformer.imagen_url }}" class="card-img-top" alt="{{ transformer.nombre }}">
+            {% else %}
+            <div class="card-img-top bg-light text-center py-5">
+                <i class="fas fa-robot fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ transformer.nombre }}</h5>
+                <p class="card-text">
+                    <span class="badge bg-primary">{{ transformer.tipo }}</span>
+                </p>
+                <p class="card-text">{{ transformer.descripcion[:100] }}{% if transformer.descripcion|length > 100 %}...{% endif %}</p>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('transformers.detail', transformer_id=transformer.id) }}" 
+                   class="btn btn-outline-primary w-100">Ver detalles</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            No hay Transformers disponibles. ¡Sé el primero en añadir uno!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

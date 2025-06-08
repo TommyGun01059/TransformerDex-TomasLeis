@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ transformer.nombre }} - TransformerDex{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('transformers.index') }}">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ transformer.nombre }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        {% if transformer.imagen_url %}
+        <img src="{{ transformer.imagen_url }}" class="img-fluid transformer-image rounded" alt="{{ transformer.nombre }}">
+        {% else %}
+        <div class="bg-light text-center py-5 rounded">
+            <i class="fas fa-robot fa-5x text-muted"></i>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        <div class="transformer-info">
+            <h1 class="mb-3">{{ transformer.nombre }}</h1>
+            
+            <div class="mb-3">
+                <span class="badge bg-primary fs-5">{{ transformer.tipo }}</span>
+                
+                <div class="mt-2">
+                    <span class="text-warning">
+                        {% for i in range(1, 6) %}
+                            {% if i <= puntuacion_promedio %}
+                            <i class="fas fa-star"></i>
+                            {% elif i <= puntuacion_promedio + 0.5 %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="ms-2">{{ puntuacion_promedio }} / 5</span>
+                </div>
+            </div>
+            
+            <h5>Descripción</h5>
+            <p>{{ transformer.descripcion }}</p>
+            
+            <h5>Habilidades</h5>
+            <p>{{ transformer.habilidades }}</p>
+            
+            {% if current_user.is_authenticated %}
+            <div class="mb-4">
+                <form method="POST" action="{{ url_for('puntuaciones.create', transformer_id=transformer.id) }}" class="d-flex align-items-center">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="me-2">Tu puntuación:</div>
+                    <div class="rating">
+                        {% for i in range(5, 0, -1) %}
+                        <input type="radio" name="valor" value="{{ i }}" id="star{{ i }}" 
+                               {% if puntuacion_usuario and puntuacion_usuario.valor == i %}checked{% endif %}>
+                        <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary ms-2">Puntuar</button>
+                </form>
+            </div>
+            {% endif %}
+            
+            {% if current_user.is_authenticated and (current_user.id == transformer.creador_id or current_user.is_admin) %}
+            <div class="mb-4">
+                <a href="{{ url_for('transformers.edit', transformer_id=transformer.id) }}" class="btn btn-warning me-2">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <form method="POST" action="{{ url_for('transformers.delete', transformer_id=transformer.id) }}" 
+                      class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Transformer?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h3>Comentarios</h3>
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('comentarios.create', transformer_id=transformer.id) }}" class="mb-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="mb-3">
+                <textarea class="form-control" name="texto" rows="3" required placeholder="Escribe tu comentario..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Comentar</button>
+        </form>
+        {% endif %}
+        
+        {% for comentario in comentarios %}
+        <div class="card mb-3 comment-card">
+            <div class="card-body">
+                <p class="card-text">{{ comentario.texto }}</p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Comentado el {{ comentario.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                    </small>
+                </p>
+                {% if current_user.is_authenticated and (current_user.id == comentario.usuario_id or current_user.is_admin) %}
+                <form method="POST" action="{{ url_for('comentarios.delete', comentario_id=comentario.id) }}" 
+                      class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este comentario?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No hay comentarios todavía. ¡Sé el primero en comentar!
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

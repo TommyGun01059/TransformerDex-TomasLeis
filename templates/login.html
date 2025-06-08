@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - TransformerDex{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="form-container">
+            <h1 class="mb-4 text-center">Iniciar Sesión</h1>
+            
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nombre de usuario</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </div>
+            </form>
+            
+            <div class="mt-3 text-center">
+                <p>¿No tienes una cuenta? <a href="{{ url_for('auth.register') }}">Regístrate</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

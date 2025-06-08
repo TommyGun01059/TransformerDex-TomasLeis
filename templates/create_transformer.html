@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Añadir Transformer - TransformerDex{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('transformers.index') }}">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Añadir Transformer</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="form-container">
+            <h1 class="mb-4">Añadir Nuevo Transformer</h1>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="" selected disabled>Selecciona un tipo</option>
+                        <option value="Autobot">Autobot</option>
+                        <option value="Decepticon">Decepticon</option>
+                        <option value="Maximal">Maximal</option>
+                        <option value="Predacon">Predacon</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="habilidades" class="form-label">Habilidades</label>
+                    <textarea class="form-control" id="habilidades" name="habilidades" rows="3"></textarea>
+                    <div class="form-text">Separa las habilidades con comas.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="imagen" class="form-label">Imagen</label>
+                    <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Crear Transformer</button>
+                    <a href="{{ url_for('transformers.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

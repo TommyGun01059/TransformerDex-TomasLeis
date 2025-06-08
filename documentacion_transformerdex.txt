@@ -1,0 +1,202 @@
+=====================================================================
+                  DOCUMENTACIÓN TRANSFORMERDEX
+=====================================================================
+
+ÍNDICE
+------
+1. Introducción
+2. Arquitectura del Sistema
+3. Modelos de Datos
+4. Flujos de Trabajo Principales
+5. Estructura del Proyecto
+6. Características Técnicas
+7. Conclusiones
+
+=====================================================================
+1. INTRODUCCIÓN
+=====================================================================
+
+TransformerDex es una aplicación web desarrollada con Flask que permite a los usuarios gestionar una base de datos de Transformers. Los usuarios pueden crear, editar, puntuar y comentar diferentes modelos de Transformers, así como visualizar los creados por otros usuarios.
+
+La aplicación utiliza Sirope/Redis como sistema de persistencia para almacenar los datos. Debido a ciertas limitaciones en la implementación de Sirope, se ha optado por utilizar un enfoque de "soft delete" para la eliminación de registros, lo que permite mantener la integridad de los datos y facilitar posibles recuperaciones futuras.
+
+=====================================================================
+2. ARQUITECTURA DEL SISTEMA
+=====================================================================
+
+TransformerDex sigue una arquitectura en capas que separa claramente las responsabilidades:
+
+(aquí encaja el diagrama de Arquitectura)
+
+- Capa de Presentación: Compuesta por plantillas HTML y archivos CSS que definen la interfaz de usuario.
+- Capa de Rutas (Controladores): Implementa los endpoints de la API y maneja las solicitudes HTTP.
+- Capa de Modelos: Define las entidades de negocio y encapsula la lógica de acceso a datos.
+- Capa de Persistencia: Gestiona el almacenamiento y recuperación de datos mediante Sirope/Redis.
+
+Esta separación permite un mantenimiento más sencillo y facilita la evolución del sistema, ya que los cambios en una capa no afectan necesariamente a las demás.
+
+=====================================================================
+3. MODELOS DE DATOS
+=====================================================================
+
+El sistema se basa en cuatro modelos principales que representan las entidades fundamentales:
+
+(aquí encaja el diagrama de Clases)
+
+3.1. Transformer
+---------------
+Representa un modelo de Transformer con sus características:
+- nombre: Nombre del Transformer
+- tipo: Tipo o categoría (Autobot, Decepticon, etc.)
+- descripcion: Descripción detallada
+- habilidades: Listado de habilidades especiales
+- imagen_url: Ruta a la imagen del Transformer
+- creador_id: ID del usuario que lo creó
+- fecha_creacion: Fecha de creación del registro
+- eliminado: Flag para indicar si ha sido "eliminado" (soft delete)
+
+3.2. Comentario
+--------------
+Representa un comentario realizado sobre un Transformer:
+- texto: Contenido del comentario
+- usuario_id: ID del usuario que lo escribió
+- transformer_id: ID del Transformer al que pertenece
+- fecha_creacion: Fecha de creación del comentario
+- eliminado: Flag para indicar si ha sido "eliminado" (soft delete)
+
+3.3. Puntuacion
+--------------
+Representa una valoración numérica de un Transformer:
+- valor: Puntuación (de 1 a 5)
+- usuario_id: ID del usuario que puntuó
+- transformer_id: ID del Transformer puntuado
+- fecha_creacion: Fecha de la puntuación
+- eliminado: Flag para indicar si ha sido "eliminada" (soft delete)
+
+3.4. Usuario
+-----------
+Representa un usuario del sistema:
+- nombre: Nombre del usuario
+- email: Correo electrónico (usado como identificador único)
+- password_hash: Hash de la contraseña
+- is_admin: Flag que indica si el usuario tiene privilegios de administrador
+
+Todos los modelos implementan métodos para:
+- save(): Guardar o actualizar en la base de datos
+- eliminar(): Marcar como eliminado (soft delete)
+- find(): Métodos estáticos para buscar registros por diferentes criterios
+
+=====================================================================
+4. FLUJOS DE TRABAJO PRINCIPALES
+=====================================================================
+
+4.1. Visualización de un Transformer
+----------------------------------
+Muestra los detalles de un Transformer, incluyendo sus comentarios y puntuación promedio, filtrando los elementos marcados como eliminados:
+
+(aquí encaja el diagrama de Secuencia para Visualización de Transformer)
+
+1. El usuario accede a la URL de un Transformer específico
+2. El controlador busca el Transformer por su ID
+3. Se cargan los comentarios asociados, filtrando los eliminados
+4. Se calcula la puntuación promedio, considerando solo puntuaciones activas
+5. Se renderiza la plantilla con todos los datos
+
+4.2. Eliminación de un Comentario (Soft Delete)
+---------------------------------------------
+Implementa la eliminación lógica de un comentario:
+
+(aquí encaja el diagrama de Secuencia para Eliminación de Comentarios)
+
+1. El usuario solicita eliminar un comentario
+2. El sistema verifica los permisos del usuario
+3. Se marca el comentario como eliminado (eliminado = True)
+4. Se guarda el cambio en la base de datos
+5. El comentario deja de mostrarse en la interfaz
+
+4.3. Eliminación de un Transformer (Soft Delete)
+----------------------------------------------
+Implementa la eliminación lógica de un Transformer y sus elementos relacionados:
+
+(aquí encaja el diagrama de Flujo para Eliminación de Transformer)
+
+1. El usuario solicita eliminar un Transformer
+2. El sistema verifica los permisos del usuario
+3. Se marcan como eliminados:
+   - El Transformer
+   - Todos sus comentarios asociados
+   - Todas sus puntuaciones asociadas
+4. Se guardan los cambios en la base de datos
+5. El Transformer y sus elementos relacionados dejan de mostrarse en la interfaz
+
+=====================================================================
+5. ESTRUCTURA DEL PROYECTO
+=====================================================================
+
+El proyecto está organizado en diferentes directorios y archivos que siguen una estructura clara:
+
+(aquí encaja el diagrama de Componentes)
+
+- app.py: Punto de entrada de la aplicación
+- extensions.py: Configuración de extensiones (Sirope, Flask-Login, etc.)
+- rutas/: Controladores de la aplicación
+  - transformers.py: Gestión de Transformers
+  - comentarios.py: Gestión de comentarios
+  - puntuaciones.py: Gestión de puntuaciones
+  - auth.py: Autenticación y gestión de usuarios
+- modelos/: Definición de las entidades de negocio
+  - transformer.py: Modelo Transformer
+  - comentario.py: Modelo Comentario
+  - puntuacion.py: Modelo Puntuacion
+  - usuario.py: Modelo Usuario
+- templates/: Plantillas HTML
+  - base.html: Plantilla base con estructura común
+  - index.html: Página principal
+  - transformer_detail.html: Detalles de un Transformer
+  - create_transformer.html: Formulario de creación
+  - edit_transformer.html: Formulario de edición
+- static/: Recursos estáticos
+  - style.css: Estilos CSS
+  - uploads/: Directorio para imágenes subidas
+
+=====================================================================
+6. CARACTERÍSTICAS TÉCNICAS
+=====================================================================
+
+6.1. Persistencia de Datos
+------------------------
+El sistema utiliza Sirope, una biblioteca que actúa como ORM sobre Redis, para la persistencia de datos. Debido a ciertas limitaciones en la implementación de Sirope para eliminar objetos, se ha implementado un enfoque de "soft delete" que marca los registros como eliminados en lugar de eliminarlos físicamente.
+
+6.2. Autenticación y Autorización
+-------------------------------
+Se utiliza Flask-Login para gestionar la autenticación de usuarios. La autorización se implementa a nivel de controlador, verificando los permisos del usuario antes de permitir acciones como edición o eliminación.
+
+6.3. Gestión de Archivos
+----------------------
+La aplicación permite subir imágenes para los Transformers, que se almacenan en el directorio static/uploads/ con nombres únicos generados mediante UUID para evitar colisiones.
+
+6.4. Protección CSRF
+-----------------
+Se implementa protección contra ataques CSRF (Cross-Site Request Forgery) mediante Flask-WTF, que genera tokens CSRF para todos los formularios.
+
+6.5. Soft Delete
+-------------
+En lugar de eliminar físicamente los registros, se utiliza un enfoque de "soft delete" que marca los registros como eliminados (eliminado = True). Esto permite:
+- Mantener un historial completo de datos
+- Evitar problemas con las limitaciones de Sirope/Redis
+- Facilitar la recuperación de elementos "eliminados" si fuera necesario
+- Mantener la integridad referencial
+
+=====================================================================
+7. CONCLUSIONES
+=====================================================================
+
+TransformerDex es una aplicación web robusta que demuestra la implementación de un sistema CRUD completo con Flask y Sirope/Redis. La arquitectura en capas y el enfoque de "soft delete" proporcionan una base sólida para el mantenimiento y la evolución futura del sistema.
+
+El uso de patrones como "soft delete" muestra cómo adaptar el diseño para superar limitaciones técnicas específicas, manteniendo la integridad y usabilidad del sistema.
+
+Posibles mejoras futuras incluyen:
+- Implementación de una interfaz de administración para gestionar elementos eliminados
+- Mejora del rendimiento mediante la optimización de consultas a Redis
+- Implementación de búsqueda y filtrado avanzados
+- Desarrollo de una API REST para permitir integraciones con otros sistemas 

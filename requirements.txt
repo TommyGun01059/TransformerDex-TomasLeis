@@ -1,0 +1,11 @@
+Flask==2.0.1
+Flask-Login==0.6.2
+Flask-WTF==1.0.1
+Werkzeug==2.0.2
+Jinja2==3.0.2
+itsdangerous==2.0.1
+python-dotenv==0.19.1
+redis==4.3.4
+Pillow==9.3.0
+sirope==0.0.1
+uuid==1.30 
